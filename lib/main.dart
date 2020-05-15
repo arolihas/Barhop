@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 void main() {
   runApp(MyApp());
@@ -26,7 +28,32 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: DefaultTabController(
+        length: 2, 
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text('BarHop')
+          ),
+          bottomNavigationBar: TabBar(
+            tabs: [
+              Tab(
+                icon: Icon(Icons.pages),
+                text: 'Testing'
+              ),
+              Tab(
+                icon: Icon(Icons.map),
+                text: 'Maps'
+              )
+            ],
+            labelColor: Colors.lightBlue,
+          ),
+          body: TabBarView(children: <Widget>[
+            MyHomePage(),
+            Maps()
+          ],
+          )
+        )
+      ),
     );
   }
 }
@@ -72,11 +99,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
     return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
       body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
@@ -98,7 +120,7 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              'You have pushed the button this many times:',
+              'You have clicked the button this many times:',
             ),
             Text(
               '$_counter',
@@ -112,6 +134,31 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class Maps extends StatefulWidget {
+  @override
+  MapState createState() => MapState();
+}
+
+class MapState extends State<Maps> {
+  GoogleMapController mapController;
+
+  final LatLng _center = const LatLng(45.521563, -122.677433);
+
+  void _onMapCreated(GoogleMapController controller) {
+    mapController = controller;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: GoogleMap(
+        onMapCreated: _onMapCreated,
+        initialCameraPosition: CameraPosition(target: _center, zoom: 11.0),
+      ),
     );
   }
 }
