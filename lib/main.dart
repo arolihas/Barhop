@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 
 void main() {
   runApp(MyApp());
@@ -144,9 +145,21 @@ class Maps extends StatefulWidget {
 }
 
 class MapState extends State<Maps> {
-  GoogleMapController mapController;
+  @override
+  void initState() {
+    super.initState();
+    _getPosition();
+  }
 
-  final LatLng _center = const LatLng(45.521563, -122.677433);
+  GoogleMapController mapController;
+  var _center;
+
+  void _getPosition() async {
+    Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    setState(() {
+      _center = LatLng(position.latitude, position.longitude);
+    });
+  } 
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
