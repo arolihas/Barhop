@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:google_maps_webservice/places.dart';
 
 void main() {
   runApp(MyApp());
@@ -152,12 +153,22 @@ class MapState extends State<Maps> {
   }
 
   GoogleMapController mapController;
-  var _center;
 
+  var _center;// = LatLng(45.521563, -122.677433);
+  var _response;
+  final places = new GoogleMapsPlaces(apiKey: "AIzaSyDLkJosEooi2EEk1YOiu8GjyYC_EPPogO0");
+  final geolocator = Geolocator();
+  
   void _getPosition() async {
-    Position position = await Geolocator().getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    Position position = await geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
+    Location location = Location(position.latitude, position.longitude);
+    PlacesSearchResponse response = await places.searchNearbyWithRadius(location, 50);
     setState(() {
       _center = LatLng(position.latitude, position.longitude);
+      _response = response;
+      for (var item in _response.results) {
+        print(item.name);
+      }
     });
   } 
 
@@ -170,8 +181,17 @@ class MapState extends State<Maps> {
     return Scaffold(
       body: GoogleMap(
         onMapCreated: _onMapCreated,
-        initialCameraPosition: CameraPosition(target: _center, zoom: 11.0),
+        initialCameraPosition: CameraPosition(target: _center, zoom: 15.0),
       ),
     );
   }
 }
+
+// MVP TODO
+// grab places near current location
+// query user about place sufficiently close to current location
+// store rating for place 
+// show ratings for all nearby places in listview and on map
+// user sign in and account
+// database for accounts and places
+// search places to see rating
