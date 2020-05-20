@@ -149,17 +149,18 @@ class MapState extends State<Maps> {
   @override
   void initState() {
     super.initState();
-    _getPosition();
+    _initMap();
   }
 
   GoogleMapController mapController;
 
-  var _center;// = LatLng(45.521563, -122.677433);
-  var _response;
+  LatLng _center;// = LatLng(45.521563, -122.677433);
+  PlacesSearchResponse _response;
+  List<Marker> _markers = <Marker>[];
   final places = new GoogleMapsPlaces(apiKey: "AIzaSyDLkJosEooi2EEk1YOiu8GjyYC_EPPogO0");
   final geolocator = Geolocator();
   
-  void _getPosition() async {
+  void _initMap() async {
     Position position = await geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.best);
     Location location = Location(position.latitude, position.longitude);
     PlacesSearchResponse response = await places.searchNearbyWithRadius(location, 50);
@@ -168,6 +169,14 @@ class MapState extends State<Maps> {
       _response = response;
       for (var item in _response.results) {
         print(item.name);
+        _markers.add(
+          Marker(
+            markerId: MarkerId(item.placeId),
+            position: LatLng(item.geometry.location.lat, item.geometry.location.lng),
+            infoWindow: InfoWindow(title: item.name, snippet: item.vicinity),
+            onTap: () {},
+          ),
+        );
       }
     });
   } 
@@ -181,6 +190,7 @@ class MapState extends State<Maps> {
     return Scaffold(
       body: GoogleMap(
         onMapCreated: _onMapCreated,
+        markers: Set<Marker>.of(_markers),
         initialCameraPosition: CameraPosition(target: _center, zoom: 15.0),
       ),
     );
